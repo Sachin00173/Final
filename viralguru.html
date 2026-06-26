@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViralGuru — YouTube Channel Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0d;
+  --s1:#111116;
+  --s2:#18181f;
+  --s3:#1f1f28;
+  --border:#2c2c3a;
+  --border2:#3a3a4a;
+  --red:#ff3333;
+  --red2:#ff6b35;
+  --red-dim:rgba(255,51,51,0.1);
+  --red-glow:rgba(255,51,51,0.25);
+  --green:#00e676;
+  --green-dim:rgba(0,230,118,0.1);
+  --blue:#4dabf7;
+  --purple:#cc5de8;
+  --yellow:#ffd43b;
+  --text:#f1f1f8;
+  --text2:#a0a0b8;
+  --text3:#606078;
+  --sans:'Poppins',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(255,51,51,0.06),transparent);pointer-events:none;z-index:0}
+.page{max-width:880px;margin:0 auto;padding:0 18px 80px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+.header{padding:36px 0 30px;display:flex;align-items:center;gap:16px}
+.hlogo{width:50px;height:50px;background:linear-gradient(135deg,var(--red),var(--red2));border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 30px var(--red-glow);flex-shrink:0}
+.htitle{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.htitle em{color:var(--red);font-style:normal}
+.hsub{font-size:12px;color:var(--text3);margin-top:2px;letter-spacing:.3px}
+
+/* ── SETTINGS ── */
+.settings-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;margin-bottom:18px;overflow:hidden}
+.settings-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:16px 20px;background:none;border:none;color:var(--text);cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;text-align:left;transition:background .15s}
+.settings-toggle:hover{background:var(--s2)}
+.settings-toggle .st-icon{font-size:18px}
+.settings-toggle .st-label{flex:1}
+.st-badge{font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:.3px}
+.st-badge.ready{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.st-badge.warn{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,51,51,.2)}
+.st-arrow{font-size:12px;color:var(--text3);transition:transform .2s}
+.st-arrow.open{transform:rotate(180deg)}
+.settings-body{padding:20px;border-top:1px solid var(--border);display:none;flex-direction:column;gap:16px}
+.settings-body.open{display:flex}
+.key-block{display:flex;flex-direction:column;gap:8px}
+.key-block label{font-size:12px;font-weight:600;color:var(--text2)}
+.key-block label span{font-weight:400;color:var(--text3);font-size:11px}
+.key-row{display:flex;gap:8px}
+.key-input{flex:1;background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .2s,box-shadow .2s}
+.key-input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+.key-input::placeholder{color:var(--text3)}
+.eye-btn{background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:16px;color:var(--text2);transition:background .15s;flex-shrink:0}
+.eye-btn:hover{background:var(--border)}
+.save-btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:14px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;letter-spacing:.2px}
+.save-btn:hover{opacity:.88;transform:translateY(-1px)}
+.key-note{font-size:11px;color:var(--text3);text-align:center;line-height:1.7}
+.key-note span{color:var(--green)}
+
+/* ── INPUT CARD ── */
+.input-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.input-card h2{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px}
+.url-wrap{display:flex;gap:10px;flex-wrap:wrap}
+.url-input{flex:1;min-width:200px;background:var(--s3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.url-input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+.url-input::placeholder{color:var(--text3)}
+.go-btn{background:var(--red);color:#fff;border:none;border-radius:12px;padding:14px 28px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s,box-shadow .2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.go-btn:hover:not(:disabled){opacity:.9;transform:translateY(-2px);box-shadow:0 8px 28px var(--red-glow)}
+.go-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.url-hints{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.url-hint{font-size:11px;color:var(--text3);background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 10px}
+
+/* ── ERROR ── */
+.error-box{background:rgba(255,51,51,.08);border:1px solid rgba(255,51,51,.3);border-radius:12px;padding:14px 18px;font-size:13px;color:#ff8080;display:none;margin-bottom:16px;line-height:1.6}
+.error-box.show{display:block}
+
+/* ── LOADER ── */
+.loader{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:52px 32px;text-align:center;display:none;margin-bottom:18px}
+.loader.show{display:block}
+.spin{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.loader-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.steps{display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto;text-align:left}
+.step-item{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text3);transition:color .3s}
+.step-item.done{color:var(--green)}
+.step-item.active{color:var(--text);font-weight:500}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+.step-item.done .step-dot{background:var(--green)}
+.step-item.active .step-dot{background:var(--red);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── RESULTS ── */
+#results{display:none}
+#results.show{display:block}
+
+/* Channel card */
+.ch-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.ch-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+.ch-avatar-ph{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+.ch-info{flex:1;min-width:0}
+.ch-name{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-handle{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:8px}
+.ch-desc{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:14px}
+.ch-stats{display:flex;gap:10px;flex-wrap:wrap}
+.ch-stat{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:8px 16px;text-align:center}
+.ch-stat-val{font-size:16px;font-weight:800;color:var(--red)}
+.ch-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+
+/* DNA card */
+.dna-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.card-title{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.dna-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px}
+.dna-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.dna-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.dna-value{font-size:13px;font-weight:600;color:var(--text);line-height:1.5}
+
+/* Section header */
+.sec-hd{display:flex;align-items:center;gap:12px;margin:28px 0 14px}
+.sec-hd h2{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.sec-badge{font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,51,51,.2)}
+.badge-blue{background:rgba(77,171,247,.1);color:var(--blue);border:1px solid rgba(77,171,247,.2)}
+
+/* Topic cards */
+.topics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px}
+.topic-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.topic-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity .2s}
+.topic-card.t-trend::before{background:linear-gradient(90deg,var(--red),var(--red2))}
+.topic-card.t-info::before{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.topic-card:hover{transform:translateY(-3px)}
+.topic-card.t-trend:hover{border-color:rgba(255,51,51,.4)}
+.topic-card.t-info:hover{border-color:rgba(77,171,247,.4)}
+.topic-card:hover::before{opacity:1}
+.topic-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.type-trend{color:var(--red)}
+.type-info{color:var(--blue)}
+.topic-num{font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:auto}
+.topic-title{font-size:14px;font-weight:700;line-height:1.45;margin-bottom:10px;color:var(--text)}
+.topic-why{font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.hook-box{background:var(--s2);border-radius:10px;padding:12px;margin-bottom:12px}
+.hook-lbl{font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.hook-text{font-size:13px;color:var(--text);line-height:1.6;font-style:italic}
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.score-lbl{font-size:10px;color:var(--text3);width:68px;flex-shrink:0}
+.score-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width 1.4s cubic-bezier(.23,1,.32,1)}
+.fill-red{background:linear-gradient(90deg,var(--red),var(--red2))}
+.fill-blue{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.score-num{font-size:11px;font-weight:700;width:26px;text-align:right;font-family:var(--mono)}
+.num-red{color:var(--red)}
+.num-blue{color:var(--blue)}
+.topic-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.topic-tag{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* Footer */
+.footer{margin-top:32px;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px 22px;font-size:12px;color:var(--text2);line-height:1.75;display:flex;gap:12px;align-items:flex-start}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:12px 22px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(0,230,118,.3);color:var(--green)}
+.toast.err{border-color:rgba(255,51,51,.3);color:#ff8080}
+
+@media(max-width:580px){
+  .topics-grid{grid-template-columns:1fr}
+  .ch-card{flex-direction:column}
+  .url-wrap{flex-direction:column}
+  .go-btn{width:100%;justify-content:center}
+  .htitle{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="hlogo">🎯</div>
+  <div>
+    <div class="htitle">Viral<em>Guru</em></div>
+    <div class="hsub">YouTube Channel Deep Analyzer · AI-powered Topic Engine</div>
+  </div>
+</header>
+
+<!-- SETTINGS -->
+<div class="settings-wrap">
+  <button class="settings-toggle" onclick="toggleSettings()" id="setToggle">
+    <span class="st-icon">⚙️</span>
+    <span class="st-label">API Keys Settings</span>
+    <span class="st-badge warn" id="stBadge">⚠️ Keys Daalo</span>
+    <span class="st-arrow" id="stArrow">▼</span>
+  </button>
+  <div class="settings-body" id="setBody">
+    <div class="key-block">
+      <label>🎬 YouTube Data API Key <span>— console.cloud.google.com → APIs & Services → Credentials</span></label>
+      <div class="key-row">
+        <input class="key-input" id="ytKey" type="password" placeholder="AIzaSy..." spellcheck="false" autocomplete="off">
+        <button class="eye-btn" onclick="toggleEye('ytKey',this)" title="Show/Hide">👁</button>
+      </div>
+    </div>
+    <div class="key-block">
+      <label>🤖 Gemini AI API Key <span>— aistudio.google.com → Get API Key</span></label>
+      <div class="key-row">
+        <input class="key-input" id="gemKey" type="password" placeholder="AQ.Ab8R..." spellcheck="false" autocomplete="off">
+        <button class="eye-btn" onclick="toggleEye('gemKey',this)" title="Show/Hide">👁</button>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveKeys()">💾 Keys Save Karo</button>
+    <p class="key-note">🔒 Keys sirf <span>aapke phone ke browser</span> mein save hoti hain — koi server nahi, koi leak nahi</p>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div class="input-card">
+  <h2>Channel ya Video URL daalo</h2>
+  <div class="url-wrap">
+    <input class="url-input" id="urlInput" type="text" placeholder="youtube.com/@channelname  ya  youtu.be/VIDEO_ID  ya  UC..." autocomplete="off" spellcheck="false">
+    <button class="go-btn" id="goBtn" onclick="analyze()">
+      <span>🔍</span><span>Analyze</span>
+    </button>
+  </div>
+  <div class="url-hints">
+    <span class="url-hint">✅ @handle</span>
+    <span class="url-hint">✅ Channel URL</span>
+    <span class="url-hint">✅ Video URL</span>
+    <span class="url-hint">✅ Channel ID</span>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div class="error-box" id="errBox"></div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="spin"></div>
+  <div class="loader-title">Channel ka DNA analyze ho raha hai...</div>
+  <div class="loader-sub">Real data + Gemini AI kaam kar raha hai</div>
+  <div class="steps">
+    <div class="step-item" id="s1"><div class="step-dot"></div><span>Channel dhundh raha hoon</span></div>
+    <div class="step-item" id="s2"><div class="step-dot"></div><span>Channel details fetch kar raha hoon</span></div>
+    <div class="step-item" id="s3"><div class="step-dot"></div><span>Recent 20 videos analyze kar raha hoon</span></div>
+    <div class="step-item" id="s4"><div class="step-dot"></div><span>Content pattern samajh raha hoon</span></div>
+    <div class="step-item" id="s5"><div class="step-dot"></div><span>Gemini AI se perfect topics generate kar raha hoon</span></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div id="rChannel"></div>
+  <div id="rDNA"></div>
+  <div class="sec-hd"><h2>🔥 Trending Topics</h2><span class="sec-badge badge-red">5 Viral-Ready</span></div>
+  <div class="topics-grid" id="rTrending"></div>
+  <div class="sec-hd"><h2>💡 Shocking Info Topics</h2><span class="sec-badge badge-blue">5 High-Retention</span></div>
+  <div class="topics-grid" id="rInfo"></div>
+  <div class="footer">
+    <span style="font-size:20px;flex-shrink:0">⚡</span>
+    <span>Ye topics <strong>real YouTube data</strong> + <strong>Gemini AI</strong> ke deep analysis se banaye gaye hain — channel ka exact tone, style, aur language match karte hain. Sahi quality aur editing ke saath viral hone ke strong chances hain.</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DEFAULT KEYS (pre-loaded, changeable)
+// ══════════════════════════════════════════
+const DEFAULT_YT  = 'AIzaSyCpccjB0KIniDTGhxIE2wX5MtiZ5q0uhZc';
+const DEFAULT_GEM = 'AQ.Ab8RN6LO8Oj4gfqN1R4QQGobMvaLJhDaFH24VH2I4w6W_YnMhQ';
+
+// Load saved or use defaults
+function loadKeys() {
+  let yt = '', gem = '';
+  try { yt  = localStorage.getItem('vg_yt')  || ''; } catch(e){}
+  try { gem = localStorage.getItem('vg_gem') || ''; } catch(e){}
+  return {
+    yt:  yt  || DEFAULT_YT,
+    gem: gem || DEFAULT_GEM
+  };
+}
+
+// Get current active keys (saved > input > default)
+function getKeys() {
+  const saved = loadKeys();
+  const ytInp  = (document.getElementById('ytKey')?.value  || '').trim();
+  const gemInp = (document.getElementById('gemKey')?.value || '').trim();
+  return {
+    yt:  ytInp.startsWith('AIza') ? ytInp  : saved.yt,
+    gem: gemInp.length > 20       ? gemInp : saved.gem
+  };
+}
+
+// ══════════════════════════════════════════
+// SETTINGS UI
+// ══════════════════════════════════════════
+function toggleSettings() {
+  const body  = document.getElementById('setBody');
+  const arrow = document.getElementById('stArrow');
+  const open  = body.classList.contains('open');
+  if (!open) {
+    const k = loadKeys();
+    document.getElementById('ytKey').value  = k.yt;
+    document.getElementById('gemKey').value = k.gem;
+    body.classList.add('open');
+    arrow.classList.add('open');
+  } else {
+    body.classList.remove('open');
+    arrow.classList.remove('open');
+  }
+}
+
+function toggleEye(id, btn) {
+  const el = document.getElementById(id);
+  el.type  = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '👁' : '🙈';
+}
+
+function saveKeys() {
+  const yt  = document.getElementById('ytKey').value.trim();
+  const gem = document.getElementById('gemKey').value.trim();
+  if (!yt)  { showToast('YouTube API Key daalo!', 'err'); return; }
+  if (!gem) { showToast('Gemini API Key daalo!', 'err'); return; }
+  if (!yt.startsWith('AIza')) { showToast('YouTube key galat — AIzaSy... se shuroo honi chahiye', 'err'); return; }
+  try { localStorage.setItem('vg_yt', yt);  } catch(e){}
+  try { localStorage.setItem('vg_gem', gem); } catch(e){}
+  updateBadge();
+  document.getElementById('setBody').classList.remove('open');
+  document.getElementById('stArrow').classList.remove('open');
+  showToast('✅ Keys save ho gayi!', 'ok');
+}
+
+function updateBadge() {
+  const k = loadKeys();
+  const badge = document.getElementById('stBadge');
+  if (!badge) return;
+  if (k.yt && k.gem) {
+    badge.textContent = '✅ Ready';
+    badge.className   = 'st-badge ready';
+  } else {
+    badge.textContent = '⚠️ Keys Daalo';
+    badge.className   = 'st-badge warn';
+  }
+}
+
+// ══════════════════════════════════════════
+// YOUTUBE API
+// ══════════════════════════════════════════
+async function ytFetch(endpoint, params, ytKey) {
+  let url = `https://www.googleapis.com/youtube/v3/${endpoint}?key=${encodeURIComponent(ytKey)}`;
+  for (const [k,v] of Object.entries(params)) {
+    url += `&${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
+  }
+  const r = await fetch(url);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d?.error?.message || `YouTube error ${r.status}`);
+  return d;
+}
+
+async function getChannel(input, ytKey) {
+  input = input.trim();
+
+  // Extract video ID
+  const vidM = input.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  if (vidM) {
+    const v = await ytFetch('videos', { part:'snippet', id: vidM[1] }, ytKey);
+    if (!v.items?.length) throw new Error('Video nahi mila');
+    const cid = v.items[0].snippet.channelId;
+    return await getChannelById(cid, ytKey);
+  }
+
+  // Extract handle
+  const handleM = input.match(/(?:youtube\.com\/)?@([\w.-]+)/);
+  if (handleM) return await getChannelByHandle(handleM[1], ytKey);
+
+  // Extract channel ID from URL
+  const chM = input.match(/youtube\.com\/channel\/(UC[\w-]+)/);
+  if (chM) return await getChannelById(chM[1], ytKey);
+
+  // Bare channel ID
+  if (/^UC[\w-]{20,}$/.test(input)) return await getChannelById(input, ytKey);
+
+  // Bare video ID
+  if (/^[A-Za-z0-9_-]{11}$/.test(input)) {
+    const v = await ytFetch('videos', { part:'snippet', id: input }, ytKey);
+    if (!v.items?.length) throw new Error('Video nahi mila');
+    return await getChannelById(v.items[0].snippet.channelId, ytKey);
+  }
+
+  // @ without URL
+  if (input.startsWith('@')) return await getChannelByHandle(input.slice(1), ytKey);
+
+  throw new Error('URL samajh nahi aaya. @handle, channel URL, ya video URL daalo.');
+}
+
+async function getChannelByHandle(handle, ytKey) {
+  // Method 1: forHandle
+  try {
+    const d = await ytFetch('channels', { part:'snippet,statistics,contentDetails', forHandle: handle }, ytKey);
+    if (d.items?.length) return d.items[0];
+  } catch(e) { console.log('forHandle:', e.message); }
+
+  // Method 2: forUsername
+  try {
+    const d = await ytFetch('channels', { part:'snippet,statistics,contentDetails', forUsername: handle }, ytKey);
+    if (d.items?.length) return d.items[0];
+  } catch(e) { console.log('forUsername:', e.message); }
+
+  // Method 3: search
+  try {
+    const s = await ytFetch('search', { part:'snippet', type:'channel', q: handle, maxResults:1 }, ytKey);
+    if (s.items?.length) {
+      const cid = s.items[0].snippet.channelId;
+      return await getChannelById(cid, ytKey);
+    }
+  } catch(e) { console.log('search:', e.message); }
+
+  throw new Error(`"@${handle}" channel nahi mila. Channel ka direct link ya Channel ID try karo.`);
+}
+
+async function getChannelById(id, ytKey) {
+  const d = await ytFetch('channels', { part:'snippet,statistics,contentDetails', id }, ytKey);
+  if (!d.items?.length) throw new Error('Channel data nahi mila');
+  return d.items[0];
+}
+
+async function getVideos(channel, ytKey) {
+  const uploadsId = channel.contentDetails?.relatedPlaylists?.uploads;
+  if (!uploadsId) return [];
+  const pl = await ytFetch('playlistItems', { part:'contentDetails', playlistId: uploadsId, maxResults:20 }, ytKey);
+  if (!pl.items?.length) return [];
+  const ids = pl.items.map(i => i.contentDetails.videoId).join(',');
+  const vids = await ytFetch('videos', { part:'snippet,statistics,contentDetails', id: ids }, ytKey);
+  return vids.items || [];
+}
+
+// ══════════════════════════════════════════
+// ANALYSIS
+// ══════════════════════════════════════════
+function analyzeContent(videos) {
+  if (!videos.length) return {};
+
+  const durations = videos.map(v => {
+    const m = (v.contentDetails?.duration||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!m) return 0;
+    return (parseInt(m[1]||0)*3600) + (parseInt(m[2]||0)*60) + parseInt(m[3]||0);
+  }).filter(Boolean);
+
+  const avgDur = durations.length ? durations.reduce((a,b)=>a+b,0)/durations.length : 0;
+  const views  = videos.map(v => parseInt(v.statistics?.viewCount||0));
+  const avgViews = views.length ? views.reduce((a,b)=>a+b,0)/views.length : 0;
+  const titles = videos.map(v => v.snippet?.title||'');
+
+  // Detect language
+  const hiCount = titles.filter(t => /[\u0900-\u097F]/.test(t)).length;
+  const language = hiCount > titles.length*0.4 ? 'Hindi' : 'English / Hinglish';
+
+  // Detect tone
+  const qCount = titles.filter(t => /\?|kya|kaise|kyun|how|why|what|क्या|कैसे|क्यों/i.test(t)).length;
+  const lCount = titles.filter(t => /\d+\s*(tips|ways|reason|secret|fact|tarike|cheez|baat)/i.test(t)).length;
+  const sCount = titles.filter(t => /story|meri|mera|maine|I |my |personal/i.test(t)).length;
+  const shCount= titles.filter(t => /shocking|secret|exposed|truth|reality|dark|viral|chmat/i.test(t)).length;
+
+  let tone = 'Informational / Educational';
+  if (qCount  > titles.length*0.35) tone = 'Question-based curiosity';
+  else if (lCount > titles.length*0.3)  tone = 'List-based numbered tips';
+  else if (sCount > titles.length*0.25) tone = 'Personal storytelling';
+  else if (shCount> titles.length*0.2)  tone = 'Shock + reveal style';
+
+  const shorts = durations.filter(d=>d<=65).length;
+  const longs  = durations.filter(d=>d>65).length;
+  const contentType = shorts > longs*2 ? 'Mostly Shorts' : longs > shorts*2 ? 'Mostly Long-form' : 'Mix of Shorts & Long';
+
+  const dates = videos.map(v=>new Date(v.snippet?.publishedAt)).filter(d=>!isNaN(d)).sort((a,b)=>b-a);
+  let freq = 'Unknown';
+  if (dates.length >= 2) {
+    const diff = (dates[0]-dates[dates.length-1])/(86400000);
+    const pw   = (dates.length/diff)*7;
+    freq = pw>=6 ? 'Daily' : pw>=3 ? `${Math.round(pw)}x/week` : pw>=1 ? 'Weekly' : 'Fortnightly/Monthly';
+  }
+
+  const topVideos = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0)).slice(0,6);
+
+  return { avgDur, avgViews, language, tone, contentType, freq, topVideos, titles, totalAnalyzed: videos.length };
+}
+
+// ══════════════════════════════════════════
+// GEMINI AI
+// ══════════════════════════════════════════
+async function geminiTopics(channelInfo, analysis, gemKey) {
+  const topTitles = (analysis.topVideos||[]).map(v=>v.snippet?.title).filter(Boolean).slice(0,6).join('\n');
+  const allTitles = (analysis.titles||[]).slice(0,15).join('\n');
+
+  const prompt = `You are the world's best YouTube growth strategist specializing in Indian YouTube content.
+
+REAL CHANNEL DATA (fetched live from YouTube API):
+Channel Name: ${channelInfo.name}
+Subscribers: ${fmt(channelInfo.subs)}
+Total Videos: ${channelInfo.vids}
+Total Views: ${fmt(channelInfo.views)}
+Country: ${channelInfo.country||'IN'}
+Channel Description: ${(channelInfo.desc||'').slice(0,300)}
+Language Pattern: ${analysis.language}
+Content Type: ${analysis.contentType}
+Avg Video Duration: ${fmtDur(Math.round(analysis.avgDur))}
+Upload Frequency: ${analysis.freq}
+Avg Views/Video: ${fmt(Math.round(analysis.avgViews))}
+Detected Tone Style: ${analysis.tone}
+Total Videos Analyzed: ${analysis.totalAnalyzed}
+
+TOP PERFORMING TITLES (most views first):
+${topTitles}
+
+RECENT VIDEO TITLES (for pattern analysis):
+${allTitles}
+
+YOUR TASK:
+Study this channel's EXACT style, language, tone, hook pattern, and title formula. Then generate:
+
+1. FIVE (5) TRENDING VIRAL TOPICS — currently trending or about to trend, HIGH viral potential, matches this channel's style EXACTLY
+2. FIVE (5) SHOCKING INFORMATIVE TOPICS — not necessarily trending but deeply engaging, shocking facts/info, high watch-time, matches channel style
+
+Rules:
+- All titles must be in the EXACT language this channel uses (Hindi/Hinglish/English)
+- Titles must follow this channel's EXACT title formula
+- Hooks must match this channel's opening style EXACTLY — as if the channel creator wrote it
+- Be SPECIFIC to this niche, not generic
+- Scores should be realistic and varied, not all 90+
+
+Respond ONLY with valid JSON (no markdown, no explanation):
+{
+  "channelAnalysis": {
+    "niche": "exact niche in 3-5 words",
+    "audienceType": "who watches this channel",
+    "contentStyle": "detailed style analysis 1-2 lines",
+    "hookPattern": "how this channel opens videos (exact style)",
+    "titleFormula": "exact formula with example"
+  },
+  "trendingTopics": [
+    {
+      "title": "exact video title in channel's language",
+      "why": "exactly why this will work for THIS channel (2 lines max)",
+      "hook": "exact opening line for first 7 seconds — in channel's voice",
+      "viralScore": 87,
+      "retentionScore": 82,
+      "tags": ["tag1", "tag2", "tag3"]
+    }
+  ],
+  "infoTopics": [
+    {
+      "title": "exact video title",
+      "why": "why this works (2 lines max)",
+      "hook": "exact opening hook in channel's voice",
+      "viralScore": 74,
+      "retentionScore": 91,
+      "tags": ["tag1", "tag2", "tag3"]
+    }
+  ]
+}`;
+
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${gemKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.85, maxOutputTokens: 2500, responseMimeType: 'application/json' }
+      })
+    }
+  );
+
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({}));
+    throw new Error(e?.error?.message || `Gemini error ${r.status}`);
+  }
+
+  const d = await r.json();
+  const raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const clean = raw.replace(/```json|```/g,'').trim();
+  const s = clean.indexOf('{'), e2 = clean.lastIndexOf('}');
+  if (s === -1) throw new Error('Gemini se response nahi aaya — dobara try karo');
+  return JSON.parse(clean.slice(s, e2+1));
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function fmt(n) {
+  n = parseInt(n||0);
+  if (n >= 1e7) return (n/1e7).toFixed(1)+'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1)+'L';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+function fmtDur(s) {
+  if (!s) return '—';
+  const m = Math.floor(s/60);
+  if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
+  return `${m}m ${s%60}s`;
+}
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function setStep(n) {
+  for(let i=1;i<n;i++){const e=document.getElementById('s'+i);if(e){e.className='step-item done';}}
+  const c=document.getElementById('s'+n);if(c)c.className='step-item active';
+}
+function doneSteps() {
+  for(let i=1;i<=5;i++){const e=document.getElementById('s'+i);if(e)e.className='step-item done';}
+}
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  el.innerHTML = msg; el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function hideErr() { document.getElementById('errBox').classList.remove('show'); }
+
+let toastT;
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════
+// MAIN ANALYZE FLOW
+// ══════════════════════════════════════════
+async function analyze() {
+  const input = document.getElementById('urlInput').value.trim();
+  if (!input) { showErr('Channel URL ya @handle daalo pehle'); return; }
+
+  const keys = getKeys();
+  if (!keys.yt || !keys.gem) {
+    showErr('⚙️ API keys missing hain — upar Settings kholo aur keys daalo');
+    toggleSettings();
+    return;
+  }
+
+  hideErr();
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('goBtn').disabled = true;
+  document.getElementById('goBtn').innerHTML = '<span>⏳</span><span>Analyzing...</span>';
+  setStep(1);
+
+  try {
+    // Step 1: Find channel
+    const channel = await getChannel(input, keys.yt);
+    const snippet = channel.snippet || {};
+    const stats   = channel.statistics || {};
+
+    const channelInfo = {
+      id:      channel.id,
+      name:    snippet.title || 'Unknown',
+      handle:  snippet.customUrl || '',
+      desc:    snippet.description || '',
+      thumb:   snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || '',
+      subs:    stats.subscriberCount || 0,
+      vids:    stats.videoCount || 0,
+      views:   stats.viewCount || 0,
+      country: snippet.country || 'IN',
+    };
+
+    setStep(2);
+    await sleep(200);
+
+    // Step 3: Fetch videos
+    setStep(3);
+    const videos = await getVideos(channel, keys.yt);
+
+    // Step 4: Analyze
+    setStep(4);
+    const analysis = analyzeContent(videos);
+    await sleep(300);
+
+    // Step 5: AI topics
+    setStep(5);
+    const ai = await geminiTopics(channelInfo, analysis, keys.gem);
+
+    doneSteps();
+    await sleep(200);
+
+    document.getElementById('loader').classList.remove('show');
+    renderResults(channelInfo, analysis, ai);
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+
+  } catch(err) {
+    document.getElementById('loader').classList.remove('show');
+    showErr('❌ ' + err.message);
+    console.error(err);
+  } finally {
+    document.getElementById('goBtn').disabled = false;
+    document.getElementById('goBtn').innerHTML = '<span>🔍</span><span>Analyze</span>';
+  }
+}
+
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderResults(ch, analysis, ai) {
+  const thumb = ch.thumb
+    ? `<img class="ch-avatar" src="${esc(ch.thumb)}" onerror="this.style.display='none'" alt="${esc(ch.name)}">`
+    : `<div class="ch-avatar-ph">📺</div>`;
+
+  document.getElementById('rChannel').innerHTML = `
+    <div class="ch-card">
+      ${thumb}
+      <div class="ch-info">
+        <div class="ch-name">${esc(ch.name)}</div>
+        <div class="ch-handle">${ch.handle ? '@'+esc(ch.handle) : esc(ch.id)}</div>
+        <div class="ch-desc">${esc((ch.desc||'').slice(0,200))}${ch.desc?.length>200?'…':''}</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-val">${fmt(ch.subs)}</div><div class="ch-stat-lbl">Subscribers</div></div>
+          <div class="ch-stat"><div class="ch-stat-val">${fmt(ch.vids)}</div><div class="ch-stat-lbl">Videos</div></div>
+          <div class="ch-stat"><div class="ch-stat-val">${fmt(ch.views)}</div><div class="ch-stat-lbl">Total Views</div></div>
+          <div class="ch-stat"><div class="ch-stat-val">${fmt(Math.round(analysis.avgViews))}</div><div class="ch-stat-lbl">Avg Views</div></div>
+        </div>
+      </div>
+    </div>`;
+
+  const ca = ai.channelAnalysis || {};
+  document.getElementById('rDNA').innerHTML = `
+    <div class="dna-card">
+      <div class="card-title">📊 Channel DNA Analysis</div>
+      <div class="dna-grid">
+        <div class="dna-item"><div class="dna-label">Niche</div><div class="dna-value">${esc(ca.niche||'—')}</div></div>
+        <div class="dna-item"><div class="dna-label">Audience</div><div class="dna-value">${esc(ca.audienceType||'—')}</div></div>
+        <div class="dna-item"><div class="dna-label">Content Style</div><div class="dna-value">${esc(ca.contentStyle||analysis.contentType||'—')}</div></div>
+        <div class="dna-item"><div class="dna-label">Tone</div><div class="dna-value">${esc(analysis.tone)}</div></div>
+        <div class="dna-item"><div class="dna-label">Avg Duration</div><div class="dna-value">${fmtDur(Math.round(analysis.avgDur))}</div></div>
+        <div class="dna-item"><div class="dna-label">Upload Freq</div><div class="dna-value">${esc(analysis.freq)}</div></div>
+        <div class="dna-item"><div class="dna-label">Language</div><div class="dna-value">${esc(analysis.language)}</div></div>
+        <div class="dna-item"><div class="dna-label">Hook Pattern</div><div class="dna-value">${esc(ca.hookPattern||'—')}</div></div>
+        <div class="dna-item"><div class="dna-label">Title Formula</div><div class="dna-value">${esc(ca.titleFormula||'—')}</div></div>
+        <div class="dna-item"><div class="dna-label">Videos Analyzed</div><div class="dna-value">${analysis.totalAnalyzed} videos</div></div>
+      </div>
+    </div>`;
+
+  const tg = document.getElementById('rTrending');
+  tg.innerHTML = '';
+  (ai.trendingTopics||[]).forEach((t,i) => tg.insertAdjacentHTML('beforeend', topicCard(t,'trend',i+1)));
+
+  const ig = document.getElementById('rInfo');
+  ig.innerHTML = '';
+  (ai.infoTopics||[]).forEach((t,i) => ig.insertAdjacentHTML('beforeend', topicCard(t,'info',i+1)));
+}
+
+function topicCard(t, type, num) {
+  const isT = type === 'trend';
+  const typeLbl  = isT ? '🔥 VIRAL TRENDING' : '💡 SHOCKING INFO';
+  const typeCls  = isT ? 'type-trend' : 'type-info';
+  const fillCls  = isT ? 'fill-red' : 'fill-blue';
+  const numCls   = isT ? 'num-red' : 'num-blue';
+  const v  = Math.max(0, Math.min(100, t.viralScore||75));
+  const r2 = Math.max(0, Math.min(100, t.retentionScore||75));
+  return `
+    <div class="topic-card t-${type}">
+      <div class="topic-type">
+        <span class="${typeCls}">${typeLbl}</span>
+        <span class="topic-num">#${num}</span>
+      </div>
+      <div class="topic-title">${esc(t.title)}</div>
+      <div class="topic-why">${esc(t.why)}</div>
+      <div class="hook-box">
+        <div class="hook-lbl">🎬 Opening Hook — 0 to 7 seconds</div>
+        <div class="hook-text">"${esc(t.hook)}"</div>
+      </div>
+      <div class="score-row">
+        <div class="score-lbl">Viral</div>
+        <div class="score-bar"><div class="score-fill ${fillCls}" style="width:${v}%"></div></div>
+        <div class="score-num ${numCls}">${v}</div>
+      </div>
+      <div class="score-row">
+        <div class="score-lbl">Retention</div>
+        <div class="score-bar"><div class="score-fill ${fillCls}" style="width:${r2}%"></div></div>
+        <div class="score-num ${numCls}">${r2}</div>
+      </div>
+      <div class="topic-tags">${(t.tags||[]).map(tg=>`<span class="topic-tag">#${esc(tg)}</span>`).join('')}</div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  updateBadge();
+  // Pre-fill inputs with saved/default keys (hidden)
+  const k = loadKeys();
+  document.getElementById('ytKey').value  = k.yt;
+  document.getElementById('gemKey').value = k.gem;
+  // Update badge - since defaults are always present, show ready
+  document.getElementById('stBadge').textContent = '✅ Ready';
+  document.getElementById('stBadge').className = 'st-badge ready';
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.id === 'urlInput') analyze();
+});
+</script>
+</body>
+</html>
